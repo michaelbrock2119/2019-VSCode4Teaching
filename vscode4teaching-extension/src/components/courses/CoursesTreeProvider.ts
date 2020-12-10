@@ -75,10 +75,10 @@ export class CoursesProvider implements vscode.TreeDataProvider<V4TItem> {
                         if (sessionInitialized) {
                             treeElements = this.updateUserInfo();
                         } else {
-                            treeElements = [V4TBuildItems.LOGIN_ITEM, V4TBuildItems.SIGNUP_ITEM];
+                            treeElements = [V4TBuildItems.LOGIN_ITEM, V4TBuildItems.SIGNUP_ITEM, V4TBuildItems.GET_WITH_CODE_ITEM];
                         }
                     } catch (error) {
-                        return [V4TBuildItems.LOGIN_ITEM, V4TBuildItems.SIGNUP_ITEM];
+                        return [V4TBuildItems.LOGIN_ITEM, V4TBuildItems.SIGNUP_ITEM, V4TBuildItems.GET_WITH_CODE_ITEM];
                     }
                 } else {
                     treeElements = this.getCourseButtonsWithUserinfo();
@@ -381,8 +381,12 @@ export class CoursesProvider implements vscode.TreeDataProvider<V4TItem> {
      * Shows code input box, calls client and adds new course to the list
      */
     public async getCourseWithCode() {
+        //TODO
         const code = await this.getInput("Introduce sharing code", Validators.validateSharingCode);
         if (code) {
+            if(!(CurrentUser.isLoggedIn() || APIClient.initializeSessionFromFile())){
+                await this.login();
+            }
             try {
                 const response = await APIClient.getCourseWithCode(code);
                 const course: Course = response.data;

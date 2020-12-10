@@ -53,7 +53,7 @@ class APIClientSingleton {
             const response = await APIClient.login(username, password);
             vscode.window.showInformationMessage("Logged in");
             APIClientSession.jwtToken = response.data.jwtToken;
-            APIClientSession.createSessionFile();
+            APIClientSession.createSessionFile(true);
             await CurrentUser.updateUserInfo();
             CoursesProvider.triggerTreeReload();
         } catch (error) {

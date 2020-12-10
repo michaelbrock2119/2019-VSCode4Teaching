@@ -22,16 +22,16 @@ class APIClientSessionSingleton {
      * Initialize session variables with file created when logging in
      */
     public initializeSessionCredentials(): boolean {
-        let success: boolean;
+        let success: boolean = false;
+        let remember:boolean;
         if (fs.existsSync(this.sessionPath)) {
             const readSession = fs.readFileSync(this.sessionPath).toString();
             const sessionParts = readSession.split("\n");
             this.jwtToken = sessionParts[0];
             this.xsrfToken = sessionParts[1];
             this.baseUrl = sessionParts[2];
-            success = true;
-        } else {
-            success = false;
+            remember= sessionParts[3] == "true";
+            success = remember;
         }
         return success;
     }
@@ -40,9 +40,11 @@ class APIClientSessionSingleton {
      * Invalidates current session and deletes session file
      */
     public invalidateSession() {
-        if (fs.existsSync(this.sessionPath)) {
-            fs.unlinkSync(this.sessionPath);
-        }
+        this.createSessionFile(false);
+
+        // if (fs.existsSync(this.sessionPath)) {
+        //     fs.unlinkSync(this.sessionPath);
+        // }
         this.jwtToken = undefined;
         this.xsrfToken = undefined;
         this.baseUrl = undefined;
@@ -52,12 +54,12 @@ class APIClientSessionSingleton {
     /**
      * Creates file with session credentials. Can be retrieved using initializeSessionCredentials()
      */
-    public createSessionFile() {
+    public createSessionFile(remember:boolean) {
         const v4tPath = path.resolve(this.sessionPath, "..");
         if (!fs.existsSync(v4tPath)) {
             mkdirp.sync(v4tPath);
         }
-        fs.writeFileSync(this.sessionPath, this.jwtToken + "\n" + this.xsrfToken + "\n" + this.baseUrl);
+        fs.writeFileSync(this.sessionPath, this.jwtToken + "\n" + this.xsrfToken + "\n" + this.baseUrl + "\n" + remember.valueOf());
     }
 
     /**
